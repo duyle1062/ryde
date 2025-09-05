@@ -1,4 +1,5 @@
 import RideCard from "@/components/RideCard";
+import * as Location from "expo-location";
 import GoogleTextInput from "@/components/GoogleTextInput";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
@@ -12,6 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "@/constants";
+import { useLocationStore } from "@/store";
+import { useEffect, useState } from "react";
 
 const recentRides = [
   [
@@ -122,10 +125,33 @@ const recentRides = [
   ],
 ];
 export default function Page() {
+  const { setUserLocation, setDestinationLocation } = useLocationStore();
   const { user } = useUser();
   const loading = false;
+  const [hasPermissions, setHasPermissions] = useState(false);
+
   const handleSignOut = () => {};
   const handleDestinationPress = () => {};
+
+  useEffect(() => {
+    const requestLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        setHasPermissions(false);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync();
+    };
+
+    const address = await Location.reverseGeocodeAsync({
+      latitude: location.coords?.latitude!,
+      longitude: location.coords?.longitude!,
+    });
+
+    requestLocation();
+  }, []);
   return (
     <SafeAreaView className="bg-neutral-500">
       <FlatList
@@ -179,8 +205,13 @@ export default function Page() {
               <Text className="text-xl font-JakartaBold mt-5 mb-3">
                 Your Current Location
               </Text>
-              <View className="flex flex-row items-center bg-transparent h-[300px]"></View>
+              <View className="flex flex-row items-center bg-transparent h-[300px]">
+                <Map />
+              </View>
             </>
+            <Text className="text-xl font-JakartaBold mt-5 mb-3">
+              Recent Rides
+            </Text>
           </>
         )}
       />
