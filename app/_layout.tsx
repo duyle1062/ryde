@@ -8,9 +8,12 @@ import { LogBox } from "react-native";
 
 import { tokenCache } from "@/lib/auth";
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+SplashScreen.preventAutoHideAsync();
 
 if (!publishableKey) {
   throw new Error(
